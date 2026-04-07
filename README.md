@@ -11,15 +11,18 @@ your cursor as you move the mouse while zoomed in.
 - Windows 8.1 or later (uses the Windows Magnification API)
 - .NET 8 Runtime  →  https://dotnet.microsoft.com/download/dotnet/8.0
   (choose "Run desktop apps" → Windows x64)
-- Run as **Administrator** (required so the low-level mouse hook can
-  intercept input over other applications)
+
+> **Note:** TrayZoom runs without administrator rights. The scroll-wheel
+> zoom hook works on all normal desktop windows. It will not intercept
+> input over other processes running as administrator (e.g. Task Manager,
+> UAC dialogs), but this rarely matters in practice.
 
 ---
 
 ## Quick start (pre-built binary)
 
 1. Place `TrayZoom.exe` anywhere you like.
-2. Right-click it → "Run as administrator".
+2. Double-click it to run.
 3. A magnifier icon appears in the system tray.
 4. Hold **Win** and scroll the mouse wheel to zoom in/out.
    The view centres on and follows your cursor.
@@ -37,8 +40,6 @@ with Windows:
 1. Press  Win + R  and type:
        shell:startup
 2. Create a shortcut to TrayZoom.exe in the folder that opens.
-3. Right-click the shortcut → Properties → Advanced → tick
-   "Run as administrator".
 
 ---
 
@@ -95,20 +96,20 @@ Click **Save** to persist settings to the registry under:
 ### Prerequisites
 
 - Windows 10 or 11
-- .NET 8 SDK →  https://dotnet.microsoft.com/download/dotnet/8.0
+- .NET 8 SDK  →  https://dotnet.microsoft.com/download/dotnet/8.0
   (choose "Build apps" → SDK → Windows x64)
 
 ### Steps
 
 1. Unzip the project folder.
 2. Double-click **build.bat**
-   └ or open a terminal in the project folder and run:
+   — or open a terminal in the project folder and run:
 
        dotnet publish -c Release -r win-x64 --self-contained false ^
            -p:PublishSingleFile=true -o .\dist
 
 3. The compiled `TrayZoom.exe` appears in the `dist\` folder.
-4. Run it as Administrator (see Quick start above).
+4. Double-click it to run (see Quick start above).
 
 ### Project structure
 
@@ -124,11 +125,11 @@ Click **Save** to persist settings to the registry under:
 All logic lives in `Program.cs`.  Key areas:
 
 - `Program.Main()`       — command-line argument parsing
-- `TrayZoomApp`         └ hook installation, zoom logic, tray menu
+- `TrayZoomApp`          — hook installation, zoom logic, tray menu
 - `TrayZoomApp.SmoothTick()` — the 60 fps timer that lerps zoom and
                                repositions the view to follow the cursor
-- `TrayZoomApp.ApplyZoom()`   — calls MagSetFullscreenTransform
-- `SettingsForm`         └ the dark-themed settings dialog
+- `TrayZoomApp.ApplyZoom()`  — calls MagSetFullscreenTransform
+- `SettingsForm`         — the dark-themed settings dialog
 
 The default zoom speed is set by the `_smoothSpeed` field (0.27).
 The default zoom step per scroll tick is `_zoomStep` (0.20).
@@ -138,9 +139,10 @@ The default zoom step per scroll tick is `_zoomStep` (0.20).
 ## Troubleshooting
 
 **Nothing happens when I scroll**
-- Make sure you are running as Administrator.
 - Some security software blocks low-level input hooks; try adding an
   exception for TrayZoom.exe.
+- The hook does not intercept input over windows running as administrator
+  (e.g. Task Manager). This is a Windows limitation for non-elevated apps.
 
 **"Could not initialise the Windows Magnification API"**
 - Confirm you are on Windows 8.1 or later.
